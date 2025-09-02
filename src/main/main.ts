@@ -14,6 +14,23 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import fs from 'fs';
+
+const windowDefaultState = { x: 0, y: 0, width: 1024, height: 728 };
+const windowStatePath = 'config/settings.json';
+
+function LoadWindowState() {
+  if (!fs.existsSync(windowStatePath)) {
+    return {};
+  }
+  let fileContent = fs.readFileSync(windowStatePath, 'utf-8');
+  try {
+    return JSON.parse(fileContent);
+  } catch (err) {
+    console.log('WindowState JSON parse error');
+    return {};
+  }
+}
 
 class AppUpdater {
   constructor() {
@@ -36,8 +53,9 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDebug = false;
+// const isDebug =
+//   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
   require('electron-debug').default();
@@ -69,10 +87,14 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
+  let loadedWindowState = LoadWindowState();
+
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    x: loadedWindowState.x || windowDefaultState.x,
+    y: loadedWindowState.y || windowDefaultState.y,
+    width: loadedWindowState.width || windowDefaultState.width,
+    height: loadedWindowState.height || windowDefaultState.height,
     icon: getAssetPath('pickpicsicon.png'),
     webPreferences: {
       webSecurity: app.isPackaged, // 画像表示のため開発環境だけfalseに
@@ -93,6 +115,22 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+  });
+
+  mainWindow.on('close', () => {
+    let sizes = mainWindow?.getSize();
+    let positions = mainWindow?.getPosition();
+    let windowState = {
+      x: positions ? positions[0] : windowDefaultState.x,
+      y: positions ? positions[1] : windowDefaultState.y,
+      width: sizes ? sizes[0] : windowDefaultState.width,
+      height: sizes ? sizes[1] : windowDefaultState.height,
+    };
+    fs.writeFile(windowStatePath, JSON.stringify(windowState), (err) => {
+      if (err) {
+        console.log('WindowState write error');
+      }
+    });
   });
 
   mainWindow.on('closed', () => {
