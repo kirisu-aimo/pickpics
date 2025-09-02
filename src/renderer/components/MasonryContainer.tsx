@@ -66,7 +66,7 @@ export default function MasonryContainer({
     });
   };
 
-  // Calc item position and container height
+  // Calc item positions and a container height
   useEffect(() => {
     if (itemHeights.length === children.length) {
       const colHeights = Array(columns).fill(0);
