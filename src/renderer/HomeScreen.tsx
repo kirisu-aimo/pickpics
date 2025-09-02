@@ -6,19 +6,14 @@ import DetailViewer from './components/DetailViewer';
 interface pathObject {
   [key: string]: string[];
 }
+interface DetailViewerState {
+  origin: { x: number; y: number };
+  scale: number;
+  mirror: { x: boolean; y: boolean };
+}
 
 export default function HomeScreen() {
   const [paths, setPaths] = useState<pathObject>({});
-  // const [isneedReload, setIsneedReload] = useState<boolean>(false);
-  const [scale, setScale] = useState<number>(1);
-  const [mirror, setMirror] = useState<{ x: boolean; y: boolean }>({
-    x: false,
-    y: false,
-  });
-  const [origin, setOrigin] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
 
   window.myAPI.menuOpen((_e, dirPath, filepaths) => {
     const newpaths = { ...paths };
@@ -26,15 +21,39 @@ export default function HomeScreen() {
     setPaths(newpaths);
   });
 
+  // DetailViewer
   const [isOpenDetailViewer, setIsOpenDetailViewer] = useState<boolean>(false);
   const [detailViewerPath, setDetailViewerPath] = useState<string>('');
+  const [detailViewerState, setDetailViewerState] = useState<DetailViewerState>(
+    {
+      origin: { x: 0, y: 0 },
+      scale: 1,
+      mirror: { x: false, y: false },
+    },
+  );
+  // const [scale, setScale] = useState<number>(1);
+  // const [mirror, setMirror] = useState<{ x: boolean; y: boolean }>({
+  //   x: false,
+  //   y: false,
+  // });
+  // const [origin, setOrigin] = useState<{ x: number; y: number }>({
+  //   x: 0,
+  //   y: 0,
+  // });
 
   const imageClickHandle = (path: string) => () => {
     setIsOpenDetailViewer(true);
     setDetailViewerPath(path);
-    setScale(1);
-    setOrigin({ x: 0, y: 0 });
-    setMirror({ x: false, y: false });
+    // Reset DetailViewer states
+    setDetailViewerState({
+      origin: { x: 0, y: 0 },
+      scale: 1,
+      mirror: { x: false, y: false },
+    });
+    // //
+    // setScale(1);
+    // setOrigin({ x: 0, y: 0 });
+    // setMirror({ x: false, y: false });
   };
 
   const onKeyDown =
@@ -57,6 +76,7 @@ export default function HomeScreen() {
       setDetailViewerPath('');
     }
   });
+
   return (
     <div
       style={{
@@ -123,7 +143,7 @@ export default function HomeScreen() {
                   role="button"
                   onClick={imageClickHandle(file)}
                   onKeyDown={onKeyDown(file)}
-                  tabIndex={index + 1000}
+                  tabIndex={index + 1}
                   key={file}
                 >
                   <img
@@ -162,12 +182,14 @@ export default function HomeScreen() {
             <DetailViewer
               path={`file://${detailViewerPath}`}
               onClose={setIsOpenDetailViewer}
-              mirror={mirror}
-              setMirror={setMirror}
-              scale={scale}
-              setScale={setScale}
-              origin={origin}
-              setOrigin={setOrigin}
+              detailViewerState={detailViewerState}
+              setDetailViewerState={setDetailViewerState}
+              // mirror={mirror}
+              // setMirror={setMirror}
+              // scale={scale}
+              // setScale={setScale}
+              // origin={origin}
+              // setOrigin={setOrigin}
             />
           </div>
         )}

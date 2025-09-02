@@ -1,25 +1,34 @@
 import React, { useState, useRef } from 'react';
 
+interface DetailViewerState {
+  origin: { x: number; y: number };
+  scale: number;
+  mirror: { x: boolean; y: boolean };
+}
 interface Props {
   path: string;
   onClose: React.Dispatch<React.SetStateAction<boolean>>;
-  scale: number;
-  setScale: React.Dispatch<React.SetStateAction<number>>;
-  mirror: { x: boolean; y: boolean };
-  setMirror: React.Dispatch<React.SetStateAction<{ x: boolean; y: boolean }>>;
-  origin: { x: number; y: number };
-  setOrigin: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  detailViewerState: DetailViewerState;
+  setDetailViewerState: React.Dispatch<React.SetStateAction<DetailViewerState>>;
+  // scale: number;
+  // setScale: React.Dispatch<React.SetStateAction<number>>;
+  // mirror: { x: boolean; y: boolean };
+  // setMirror: React.Dispatch<React.SetStateAction<{ x: boolean; y: boolean }>>;
+  // origin: { x: number; y: number };
+  // setOrigin: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
 }
 
 export default function DetailViewer({
   path,
   onClose,
-  scale,
-  setScale,
-  mirror,
-  setMirror,
-  origin,
-  setOrigin,
+  detailViewerState,
+  setDetailViewerState,
+  // scale,
+  // setScale,
+  // mirror,
+  // setMirror,
+  // origin,
+  // setOrigin,
 }: Props) {
   type Coords = { x: number; y: number };
   const viewerRef = useRef<HTMLDivElement>(null!);
@@ -34,44 +43,76 @@ export default function DetailViewer({
 
   const onMouseDown = (e: React.MouseEvent) => {
     setIsMouseDown(true);
+    if (e.shiftKey) {
+      setIsRightButton(true);
+    }
     if (e.button === 1) {
       setIsRightButton(true);
     } else {
       setIsRightButton(false);
     }
     setStartPoint({ x: e.clientX, y: e.clientY });
-    setStartDirection({ ...mirror });
+    setStartDirection({ ...detailViewerState.mirror });
   };
 
   const onMouseUp = () => {
     setIsMouseDown(false);
   };
 
+  const { origin, scale, mirror } = detailViewerState;
+
+  const setOrigin = (newOrigin: { x: number; y: number }) => {
+    setDetailViewerState((prev) => ({
+      ...prev,
+      origin: newOrigin,
+    }));
+  };
+  const setScale = (newScale: number) => {
+    setDetailViewerState((prev) => ({
+      ...prev,
+      scale: newScale,
+    }));
+  };
+  const setMirror = (newMirror: { x: boolean; y: boolean }) => {
+    setDetailViewerState((prev) => ({
+      ...prev,
+      mirror: newMirror,
+    }));
+  };
+
+  const translateImage = (e: React.MouseEvent) => {
+    const newOrigin = {
+      x: origin.x + (e.movementX / scale) * (mirror.x ? -1 : 1),
+      y: origin.y + (e.movementY / scale) * (mirror.y ? -1 : 1),
+    };
+    setOrigin(newOrigin);
+  };
+
+  const inverseImage = (e: React.MouseEvent) => {
+    const rect = viewerRef.current.getBoundingClientRect();
+    const startPointfromCenter = {
+      x: startPoint.x - (rect.left + rect.width / 2),
+      y: startPoint.y - (rect.top + rect.height / 2),
+    };
+    const currentPointfromCenter = {
+      x: e.clientX - (rect.left + rect.width / 2),
+      y: e.clientY - (rect.top + rect.height / 2),
+    };
+    const newMirror = { ...startDirection };
+    if (startPointfromCenter.x * currentPointfromCenter.x < 0) {
+      newMirror.x = !newMirror.x;
+    }
+    if (startPointfromCenter.y * currentPointfromCenter.y < 0) {
+      newMirror.y = !newMirror.y;
+    }
+    setMirror(newMirror);
+  };
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isMouseDown) return;
     if (!isRightButton) {
-      setOrigin((prev) => ({
-        x: prev.x + (e.movementX / scale) * (mirror.x ? -1 : 1),
-        y: prev.y + (e.movementY / scale) * (mirror.y ? -1 : 1),
-      }));
+      translateImage(e);
     } else if (isRightButton) {
-      const rect = viewerRef.current.getBoundingClientRect();
-      const startPointfromCenter = {
-        x: startPoint.x - (rect.left + rect.width / 2),
-        y: startPoint.y - (rect.top + rect.height / 2),
-      };
-      const currentPointfromCenter = {
-        x: e.clientX - (rect.left + rect.width / 2),
-        y: e.clientY - (rect.top + rect.height / 2),
-      };
-      const newMirror = { ...startDirection };
-      if (startPointfromCenter.x * currentPointfromCenter.x < 0) {
-        newMirror.x = !newMirror.x;
-      }
-      if (startPointfromCenter.y * currentPointfromCenter.y < 0) {
-        newMirror.y = !newMirror.y;
-      }
-      setMirror(newMirror);
+      inverseImage(e);
     }
   };
 
@@ -91,10 +132,12 @@ export default function DetailViewer({
       onClose(false);
     }
     if (e.key === '+') {
-      setScale((prev) => Math.min(prev / 0.8, 8));
+      const postScale = Math.min(scale / 0.8, 8);
+      setScale(postScale);
     }
     if (e.key === '-') {
-      setScale((prev) => Math.max(prev * 0.8, 0.3));
+      const postScale = Math.max(scale * 0.8, 0.3);
+      setScale(postScale);
     }
   };
 
