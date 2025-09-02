@@ -46,7 +46,7 @@ export default function DetailViewer({
     if (e.shiftKey) {
       setIsRightButton(true);
     }
-    if (e.button === 1) {
+    if (e.button === 2) {
       setIsRightButton(true);
     } else {
       setIsRightButton(false);

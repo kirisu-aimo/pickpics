@@ -46,14 +46,14 @@ export default class MenuBuilder {
     this.mainWindow.webContents.on('context-menu', (_, props) => {
       const { x, y } = props;
 
-      Menu.buildFromTemplate([
-        {
-          label: 'Inspect element',
-          click: () => {
-            this.mainWindow.webContents.inspectElement(x, y);
-          },
-        },
-      ]).popup({ window: this.mainWindow });
+      // Menu.buildFromTemplate([
+      //   {
+      //     label: 'Inspect element',
+      //     click: () => {
+      //       this.mainWindow.webContents.inspectElement(x, y);
+      //     },
+      //   },
+      // ]).popup({ window: this.mainWindow });
     });
   }
 
@@ -197,6 +197,14 @@ export default class MenuBuilder {
     return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
   }
 
+  encodeURI = (str: string) => {
+    return str
+      .replace(/%/g, '%25')
+      .replace(/#/g, '%23')
+      .replace(/\?/g, '%3F')
+      .replace(/ /g, '%20');
+  };
+
   buildDefaultTemplate() {
     const getImageFiles = (dirPath: string) => {
       const files: string[] = fs.readdirSync(dirPath);
@@ -205,10 +213,7 @@ export default class MenuBuilder {
         return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
       });
       const imagePaths: string[] = images.map((f) => path.join(dirPath, f));
-      return imagePaths;
-      // return imagePaths.map((imagePath) =>
-      //   readFileSync(imagePath).toString('base64'),
-      // );
+      return imagePaths.map((p) => this.encodeURI(p));
     };
     const templateDefault = [
       {
