@@ -10,8 +10,8 @@ interface Props {
 
 export default function MasonryContainer({
   children,
-  optimalWidth = 150,
-  gap = 10,
+  optimalWidth = 150, // optimal width of MasonryItem
+  gap = 10, // between MasonryItem
 }: Props) {
   const masonryContainerRef = useRef<HTMLDivElement>(null!);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -21,8 +21,9 @@ export default function MasonryContainer({
   const [positions, setPositions] = useState<{ left: number; top: number }[]>(
     [],
   );
-  const timeoutRef = useRef<number | null>(null);
 
+  const timeoutRef = useRef<number | null>(null);
+  const delay = 100; // ms , delay of resize observer
   useEffect(() => {
     const element = masonryContainerRef.current;
     const observer = new ResizeObserver(() => {
@@ -31,7 +32,7 @@ export default function MasonryContainer({
       }
       timeoutRef.current = window.setTimeout(() => {
         setContainerWidth(element.offsetWidth);
-      }, 100);
+      }, delay);
     });
     if (element) {
       observer.observe(element);
@@ -65,6 +66,7 @@ export default function MasonryContainer({
     });
   };
 
+  // Calc item position and container height
   useEffect(() => {
     if (itemHeights.length === children.length) {
       const colHeights = Array(columns).fill(0);
@@ -96,7 +98,6 @@ export default function MasonryContainer({
         width: '100%',
         height: containerHeight,
         minHeight: '100vh',
-        // overflowY: 'scroll',
       }}
     >
       {children.map((child, idx) => {
