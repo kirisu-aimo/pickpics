@@ -39,7 +39,6 @@ export default function HomeScreen() {
     const newPaths = paths;
     delete newPaths[dirPath];
     setPaths(newPaths);
-    // setReloadController((prev) => prev!);
     await loadImgPaths();
   };
   const onClickOpen = async () => {
@@ -50,12 +49,7 @@ export default function HomeScreen() {
   return (
     <div>
       <TitleBar onClickOpen={onClickOpen} />
-      <Main
-        paths={paths}
-        onReload={loadImgPaths}
-        onDelete={deleteDirPath}
-        // reloadController={reloadController}
-      />
+      <Main paths={paths} onReload={loadImgPaths} onDelete={deleteDirPath} />
     </div>
   );
 }

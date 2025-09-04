@@ -60,7 +60,7 @@ export default function MasonryContainer({
   }, [containerWidth, optimalWidth, gap]);
 
   const handleItemMount = (index: number, height: number) => {
-    // if (itemHeights[index] === height) return;
+    if (itemHeights[index] === height || height === 0) return;
     setItemHeights((prev) => {
       const next = [...prev];
       next[index] = height;
@@ -71,9 +71,11 @@ export default function MasonryContainer({
   useEffect(() => {
     setItemHeights(Array(children.length).fill(0));
   }, [children]);
+
   // Calc item positions and a container height
   useEffect(() => {
     if (itemHeights.length !== children.length) return;
+    // console.log('calc item position');
     const colHeights = Array(columns).fill(0);
     const colWidth = Math.floor((containerWidth - gap) / columns - gap);
     const pos: { left: number; top: number }[] = [];
@@ -92,6 +94,7 @@ export default function MasonryContainer({
     });
     setPositions(pos);
     setContainerHeight(maxHeights + gap);
+    // eslint-disable-next-line
   }, [itemHeights, columns, containerWidth, gap, children]);
 
   return (

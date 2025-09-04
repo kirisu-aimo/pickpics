@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import MasonryContainer from './MasonryContainer';
 import DetailViewer from './DetailViewer';
+import DetailViewerHeader from './DetailViewerHeader';
+import BreadCrumb from './BreadCrumb';
 // import { v4 as uuidv4 } from 'uuid';
 // import path from 'path';
 
@@ -26,6 +28,8 @@ export default function Main({
   onDelete,
   // reloadController,
 }: Props) {
+  const masonryContainerWrapperRef = useRef<HTMLDivElement>(null!);
+
   const encodeURI = (str: string) => {
     return str
       .replace(/%/g, '%25')
@@ -71,18 +75,9 @@ export default function Main({
       }
     };
 
-  // window.addEventListener('keydown', (e) => {
-  //   if (e.key === 'F5') {
-  //     window.location.reload();
-  //   }
-  //   if (e.key === 'escape') {
-  //     setIsOpenDetailViewer(false);
-  //     setDetailViewerPath('');
-  //   }
-  // });
-
   return (
     <div
+      className="main-wrapper"
       style={{
         height: '100vh',
         overflow: 'hidden',
@@ -93,44 +88,12 @@ export default function Main({
       }}
     >
       {Object.keys(paths).map((dirPath) => (
-        <div
-          key={dirPath}
-          style={{
-            height: '20px',
-            display: 'flex',
-            flexDirection: 'row',
-            padding: '3px 10px',
-            alignItems: 'center',
-            borderBottom: '1px solid #000',
-          }}
-        >
-          <ol className="breadcrumb">
-            {dirPath
-              .split('\\')
-              .filter((_, index, array) => index > array.length - 4)
-              .map((path) => (
-                <li className="breadcrumb-item" key={path}>
-                  {path}
-                </li>
-              ))}
-          </ol>
-          <button
-            type="button"
-            onClick={onReload}
-            style={{ marginLeft: 'auto' }}
-          >
-            Reload
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              onDelete(dirPath);
-              onCloseViewer();
-            }}
-          >
-            Close
-          </button>
-        </div>
+        <BreadCrumb
+          dirPath={dirPath}
+          onCloseViewer={onCloseViewer}
+          onDelete={onDelete}
+          onReload={onReload}
+        />
       ))}
       <div
         style={{
@@ -142,6 +105,7 @@ export default function Main({
         }}
       >
         <div
+          ref={masonryContainerWrapperRef}
           style={{
             width: isOpenDetailViewer ? '100px' : '100%',
             flex: '0 0 auto',
@@ -154,7 +118,7 @@ export default function Main({
         >
           <MasonryContainer
             // reloadController={reloadController}
-            optimalWidth={100}
+            optimalWidth={150}
             gap={10}
           >
             {Object.values(paths)
@@ -197,38 +161,10 @@ export default function Main({
               flex: '1 1 auto',
             }}
           >
-            <div
-              style={{
-                width: 'auto',
-                flexDirection: 'row',
-                padding: '5px 10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: '1px solid #000',
-                height: '30px',
-              }}
-            >
-              <div
-                style={{
-                  minWidth: '0',
-                  flex: '1 1 auto',
-                  color: '#888',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {detailViewerPath.replace(/.*\\/, '')}
-              </div>
-              <button
-                type="button"
-                onClick={onCloseViewer}
-                style={{ width: 'auto', height: '80%', flex: '0 0 auto' }}
-              >
-                Exit
-              </button>
-            </div>
+            <DetailViewerHeader
+              onCloseViewer={onCloseViewer}
+              detailViewerPath={detailViewerPath}
+            />
             <DetailViewer
               path={`file://${encodeURI(detailViewerPath)}`}
               onClose={setIsOpenDetailViewer}
