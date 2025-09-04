@@ -98,7 +98,6 @@ export default function Main({
       <div
         style={{
           width: '100%',
-          // height: '100%',
           display: 'flex',
           flexDirection: 'row',
           overflow: 'hidden',
@@ -116,11 +115,7 @@ export default function Main({
             height: '100%',
           }}
         >
-          <MasonryContainer
-            // reloadController={reloadController}
-            optimalWidth={150}
-            gap={10}
-          >
+          <MasonryContainer optimalWidth={150} gap={10}>
             {Object.values(paths)
               .flat()
               .map((file, index) => (

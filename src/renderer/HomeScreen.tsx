@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Main from './components/Main';
 import TitleBar from './components/TitleBar';
 
@@ -15,11 +15,14 @@ export default function HomeScreen() {
   const [paths, setPaths] = useState<pathObject>({});
   // const [reloadController, setReloadController] = useState<boolean>(false);
 
-  window.myAPI.menuOpen((_e, dirPath, filepaths) => {
-    const newpaths = { ...paths };
-    newpaths[dirPath] = filepaths;
-    setPaths(newpaths);
-  });
+  useEffect(() => {
+    const removeListener = window.myAPI.menuOpen((_e, dirPath, filepaths) => {
+      setPaths((prev) => ({ ...prev, [dirPath]: filepaths }));
+    });
+    return () => {
+      if (removeListener) removeListener();
+    };
+  }, []);
 
   const openDirectory = async () => {
     const dirPath = await window.myAPI.getDirPath();

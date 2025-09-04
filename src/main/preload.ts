@@ -32,6 +32,7 @@ const menuOpen = (
 ) => {
   // 'menu-open' チャンネルへ受信
   ipcRenderer.on('menu-open', listener);
+  return () => ipcRenderer.off('menu-open', listener);
 };
 
 const getFilepathsinDirectory = (

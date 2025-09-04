@@ -11,7 +11,7 @@ export interface IElectronAPI {
       dirPath: string,
       filepaths: string[],
     ) => void,
-  ) => Electron.IpcRenderer;
+  ) => () => Electron.IpcRenderer;
   getDirPath: () => string;
   getImgsPath: (dirPaths: string[]) => pathObject;
 }

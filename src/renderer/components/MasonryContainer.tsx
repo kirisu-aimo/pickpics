@@ -75,7 +75,7 @@ export default function MasonryContainer({
   // Calc item positions and a container height
   useEffect(() => {
     if (itemHeights.length !== children.length) return;
-    // console.log('calc item position');
+    console.log('calc item position');
     const colHeights = Array(columns).fill(0);
     const colWidth = Math.floor((containerWidth - gap) / columns - gap);
     const pos: { left: number; top: number }[] = [];
@@ -94,7 +94,6 @@ export default function MasonryContainer({
     });
     setPositions(pos);
     setContainerHeight(maxHeights + gap);
-    // eslint-disable-next-line
   }, [itemHeights, columns, containerWidth, gap, children]);
 
   return (
