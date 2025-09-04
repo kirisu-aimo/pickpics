@@ -1,15 +1,17 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import MasonryItem from './MasonryItem';
 
 interface Props {
   children: React.ReactElement[];
+  // reloadController: boolean;
   optimalWidth: number;
   gap: number;
 }
 
 export default function MasonryContainer({
   children,
+  // reloadController,
   optimalWidth = 150, // optimal width of MasonryItem
   gap = 10, // between MasonryItem
 }: Props) {
@@ -58,7 +60,7 @@ export default function MasonryContainer({
   }, [containerWidth, optimalWidth, gap]);
 
   const handleItemMount = (index: number, height: number) => {
-    if (itemHeights[index] === height) return;
+    // if (itemHeights[index] === height) return;
     setItemHeights((prev) => {
       const next = [...prev];
       next[index] = height;
@@ -66,28 +68,30 @@ export default function MasonryContainer({
     });
   };
 
+  useEffect(() => {
+    setItemHeights(Array(children.length).fill(0));
+  }, [children]);
   // Calc item positions and a container height
   useEffect(() => {
-    if (itemHeights.length === children.length) {
-      const colHeights = Array(columns).fill(0);
-      const colWidth = Math.floor((containerWidth - gap) / columns - gap);
-      const pos: { left: number; top: number }[] = [];
-      let maxHeights = 0;
-      children.forEach((_, i) => {
-        const minColHeightsIdx = colHeights.reduce(
-          (prevIdx, current, currIdx, array) =>
-            array[prevIdx] <= current ? prevIdx : currIdx,
-          0,
-        );
-        const left = (colWidth + gap) * minColHeightsIdx + gap;
-        const top = colHeights[minColHeightsIdx] + gap;
-        pos[i] = { left, top };
-        colHeights[minColHeightsIdx] = top + itemHeights[i];
-        maxHeights = Math.max(maxHeights, top + itemHeights[i]);
-      });
-      setPositions(pos);
-      setContainerHeight(maxHeights + gap);
-    }
+    if (itemHeights.length !== children.length) return;
+    const colHeights = Array(columns).fill(0);
+    const colWidth = Math.floor((containerWidth - gap) / columns - gap);
+    const pos: { left: number; top: number }[] = [];
+    let maxHeights = 0;
+    children.forEach((_, i) => {
+      const minColHeightsIdx = colHeights.reduce(
+        (prevIdx, current, currIdx, array) =>
+          array[prevIdx] <= current ? prevIdx : currIdx,
+        0,
+      );
+      const left = (colWidth + gap) * minColHeightsIdx + gap;
+      const top = colHeights[minColHeightsIdx] + gap;
+      pos[i] = { left, top };
+      colHeights[minColHeightsIdx] = top + itemHeights[i];
+      maxHeights = Math.max(maxHeights, top + itemHeights[i]);
+    });
+    setPositions(pos);
+    setContainerHeight(maxHeights + gap);
   }, [itemHeights, columns, containerWidth, gap, children]);
 
   return (
@@ -104,7 +108,7 @@ export default function MasonryContainer({
         return (
           <MasonryItem
             index={idx}
-            key={uuidv4()}
+            key={child.key}
             onMount={handleItemMount}
             colWidth={Math.floor((containerWidth - gap) / columns - gap)}
             position={positions[idx] || null}

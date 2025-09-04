@@ -46,14 +46,14 @@ export default class MenuBuilder {
     this.mainWindow.webContents.on('context-menu', (_, props) => {
       const { x, y } = props;
 
-      // Menu.buildFromTemplate([
-      //   {
-      //     label: 'Inspect element',
-      //     click: () => {
-      //       this.mainWindow.webContents.inspectElement(x, y);
-      //     },
-      //   },
-      // ]).popup({ window: this.mainWindow });
+      Menu.buildFromTemplate([
+        {
+          label: 'Inspect element',
+          click: () => {
+            this.mainWindow.webContents.inspectElement(x, y);
+          },
+        },
+      ]).popup({ window: this.mainWindow });
     });
   }
 
@@ -218,7 +218,15 @@ export default class MenuBuilder {
     const templateDefault = [
       {
         label: '&File',
+        accelarator: 'Alt+F',
         submenu: [
+          {
+            label: '&Escape',
+            accelerator: 'Esc',
+            click: () => {
+              this.mainWindow.webContents.send('menu-escape');
+            },
+          },
           {
             label: '&Open',
             accelerator: 'Ctrl+O',

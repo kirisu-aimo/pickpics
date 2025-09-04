@@ -34,10 +34,19 @@ const menuOpen = (
   ipcRenderer.on('menu-open', listener);
 };
 
+const getFilepathsinDirectory = (
+  listener: (_e: IpcRendererEvent, dirPath: string) => void,
+) => {
+  ipcRenderer.on('getFilepathsinDirectory', listener);
+};
+
 contextBridge.exposeInMainWorld('electron', electronHandler);
 
 contextBridge.exposeInMainWorld('myAPI', {
   menuOpen,
+  getDirPath: () => ipcRenderer.invoke('get-dir-path'),
+  getImgsPath: (dirPaths: string[]) =>
+    ipcRenderer.invoke('get-imgs-path', dirPaths),
 });
 
 export type ElectronHandler = typeof electronHandler;

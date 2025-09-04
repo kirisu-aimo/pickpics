@@ -159,6 +159,7 @@ export default function DetailViewer({
         overflow: 'hidden',
         cursor: isMouseDown ? 'grabbing' : 'grab',
         height: '100%',
+        width: '100%',
         display: 'flex',
         justifyContent: 'center',
       }}

@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -53,6 +53,33 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
+ipcMain.handle('get-dir-path', async () => {
+  return dialog
+    .showOpenDialog(mainWindow!, {
+      properties: ['openDirectory'],
+      title: 'フォルダを選択する',
+    })
+    .then((result) => {
+      if (result.canceled) return;
+      return result.filePaths[0]; // ディレクトリパスを送信
+    })
+    .catch((err) => console.log(`Error: ${err}`));
+});
+
+ipcMain.handle('get-imgs-path', async (_e, dirPaths: string[]) => {
+  const newPaths: { [key: string]: string[] } = {};
+  for (const dirPath of dirPaths) {
+    const files: string[] = fs.readdirSync(dirPath);
+    const images: string[] = files.filter((file: string) => {
+      const ext = path.extname(file).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+    });
+    const imagePaths: string[] = images.map((f) => path.join(dirPath, f));
+    newPaths[dirPath] = imagePaths;
+  }
+  return newPaths;
+});
+
 const isDebug = false;
 // const isDebug =
 //   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
@@ -90,7 +117,13 @@ const createWindow = async () => {
   let loadedWindowState = LoadWindowState();
 
   mainWindow = new BrowserWindow({
-    show: false,
+    // show: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#303030',
+      symbolColor: '#ccc',
+      height: 30,
+    },
     x: loadedWindowState.x || windowDefaultState.x,
     y: loadedWindowState.y || windowDefaultState.y,
     width: loadedWindowState.width || windowDefaultState.width,

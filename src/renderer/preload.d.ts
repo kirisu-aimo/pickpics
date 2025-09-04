@@ -1,5 +1,9 @@
 import { ElectronHandler } from '../main/preload';
 
+export interface pathObject {
+  [key: string]: string[];
+}
+
 export interface IElectronAPI {
   menuOpen: (
     listener: (
@@ -8,6 +12,8 @@ export interface IElectronAPI {
       filepaths: string[],
     ) => void,
   ) => Electron.IpcRenderer;
+  getDirPath: () => string;
+  getImgsPath: (dirPaths: string[]) => pathObject;
 }
 
 declare global {

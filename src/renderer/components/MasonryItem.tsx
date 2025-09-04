@@ -23,10 +23,11 @@ export default function MasonryItem({
       onMount(index, height);
     }
     // eslint-disable-next-line
-  }, [colWidth, children]);
+  }, [colWidth, children, index, position]);
 
   return (
     <div
+      key={children.key}
       ref={masonryItemRef}
       style={{
         position: position ? 'absolute' : 'static',
